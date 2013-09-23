@@ -20,6 +20,8 @@ namespace DigitalCircuitDesign
         int height = 60;
         int error = 10;
 
+        public static bool currentCommandWordRecognized = false;
+
         string[,] array = new string[100, 100];
         public Form1()
         {
@@ -30,7 +32,6 @@ namespace DigitalCircuitDesign
         {
             DrawGrid();
             DrawComponents();
-            RecognizeSpeech();
             //base.OnPaint(e);
             //DrawLShapeLine(this.CreateGraphics(), 10, 10, 20, 40);
         }
@@ -184,6 +185,8 @@ namespace DigitalCircuitDesign
             recognizer.SpeechRecognitionRejected += new EventHandler<SpeechRecognitionRejectedEventArgs>(SpeechRejected);  
             recognizer.SetInputToDefaultAudioDevice();
 
+            GrammarBuilder commandStarter = new GrammarBuilder("Command");
+
             GrammarBuilder clear = new GrammarBuilder("Clear");
  
             GrammarBuilder insert = new GrammarBuilder("Insert");
@@ -212,15 +215,18 @@ namespace DigitalCircuitDesign
             Grammar _clear_grammar = new Grammar(clear);
             Grammar _insert_grammar = new Grammar(insert);
             Grammar _connect_grammar = new Grammar(connect);
+            Grammar _command_starter = new Grammar(commandStarter);
 
             recognizer.LoadGrammarAsync(_clear_grammar);
             recognizer.LoadGrammarAsync(_insert_grammar);
             recognizer.LoadGrammarAsync(_connect_grammar);
+            recognizer.LoadGrammarAsync(_command_starter);
             
-            //recognizer.RecognizeAsync(RecognizeMode.Multiple);
+            
             while (true)
             {
                 recognizer.Recognize();
+                //recognizer.RecognizeAsync(RecognizeMode.Multiple);
             }
             
         }
@@ -231,29 +237,52 @@ namespace DigitalCircuitDesign
             //MessageBox.Show("Done Loading Grammer");
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            RecognizeSpeech();
+        }
+
         public void SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
             //Console.WriteLine("Speech recognized: " + e.Result.Text);
-            MessageBox.Show(e.Result.Text);
+            //MessageBox.Show(e.Result.Text);
             string command = e.Result.Text;
             string[] tokens = command.Split(' ');
-            if (tokens[0] == "Insert")
+
+            if (currentCommandWordRecognized == false && tokens[0] == "Command")
             {
-                if(tokens.Length != 6)
-                {  return;   }
-                
-                string gate= tokens[1];
-                string row = "R";
-                string column = "C";
-                int r = GetNumber(tokens[3]);
-                int c = GetNumber(tokens[5]);
-                if (r == -1 || c == -1)
-                    return;
-                row = row + r;
-                column = column + c;
-                addGates(gate, row, column);
+                textBox1.Text = "Recognizing...";
+                currentCommandWordRecognized = true;
+                return;
             }
-            else if (tokens[0] == "Connect")
+            else if (currentCommandWordRecognized == true)
+            {
+                //PictureBox box = new PictureBox();
+                //box.Location = new Point(10, 10);
+                //box.Image = Image.FromFile("C:\\Users\\patrick\\Documents\\Visual Studio 2012\\Projects\\DigitalCircuitDesign\\DigitalCircuitDesign\\images\\loading.gif");
+                //box.Size = new Size(width - 1, height - error);
+                //box.Parent = this;
+
+                if (tokens[0] == "Insert")
+                {
+                    if (tokens.Length != 6)
+                    { return; }
+
+                    string gate = tokens[1];
+                    string row = "R";
+                    string column = "C";
+                    int r = GetNumber(tokens[3]);
+                    int c = GetNumber(tokens[5]);
+                    if (r == -1 || c == -1)
+                        return;
+                    row = row + r;
+                    column = column + c;
+                    //MessageBox.Show(" " + row + " " + column + " " + gate);
+                    textBox1.Text = "Command recognized is: " + e.Result.Text + ". Please say OK or Retry";
+                    addGates(gate, row, column);
+                    return;
+                }
+                else if (tokens[0] == "Connect")
                 {
                     if (tokens.Length != 8)
                     { return; }
@@ -263,10 +292,26 @@ namespace DigitalCircuitDesign
                     int rowE = GetNumber(tokens[6]);
                     int colE = GetNumber(tokens[7]);
                     MessageBox.Show(e.Result.Text);
+                    textBox1.Text = "Command recognized is: " + e.Result.Text + ". Please say OK or Retry";
                     connectGates(rowS, colS, rowE, colE);
                 }
-            else if (tokens[0] == "Clear")
-            { }
+                else if (tokens[0] == "Clear")
+                {
+
+                    Random r = new Random(10);
+                    String row = r.Next(7).ToString();
+                    String column = r.Next(10).ToString();
+                    MessageBox.Show(row + " " + column);
+                    addGates("or", "R" + row, "C1" + column);
+                    textBox1.Text = "Command recognized is: " + e.Result.Text + ". Please say OK or Retry";
+                }
+                currentCommandWordRecognized = false;
+            }
+            else 
+            {
+                MessageBox.Show("Please start youre command with word COMMAND");
+                return;
+            }
       
         }
 
@@ -274,6 +319,7 @@ namespace DigitalCircuitDesign
         {
             //Console.WriteLine("Speech input failed");
             MessageBox.Show("Failed");
+            currentCommandWordRecognized = false;
         }
 
         public int GetNumber(string numberString)

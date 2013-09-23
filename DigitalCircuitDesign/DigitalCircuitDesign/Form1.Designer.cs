@@ -34,25 +34,24 @@
             // 
             // textBox1
             // 
-            this.textBox1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.textBox1.Location = new System.Drawing.Point(0, 461);
+            this.textBox1.Location = new System.Drawing.Point(380, 570);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(940, 121);
+            this.textBox1.Size = new System.Drawing.Size(561, 36);
             this.textBox1.TabIndex = 2;
+            this.textBox1.Text = "I am cool";
             // 
             // button1
             // 
-            /*this.button1.Location = new System.Drawing.Point(812, 474);
+            this.button1.Location = new System.Drawing.Point(626, 541);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 3;
-            this.button1.Text = "Test";
+            this.button1.Text = "Press";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
-             */
             // 
             // Form1
             // 
